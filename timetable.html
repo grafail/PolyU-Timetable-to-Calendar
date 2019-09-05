@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+  integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+  integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+  integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+  integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="ics/build/ics.deps.min.js"></script>
+
+
+<head>
+  <style>
+    table,
+    td {
+      border: 1px solid black;
+    }
+
+    .table-fit {
+      width: 1px;
+    }
+
+    .select-style {
+      border: 1px solid #ccc;
+      width: 120px;
+      border-radius: 3px;
+      overflow: visible;
+    }
+
+    .select-style select {
+      padding: 5px 8px;
+      width: 130%;
+      border: none;
+      box-shadow: none;
+      background: transparent;
+      background-image: none;
+      -webkit-appearance: none;
+    }
+
+    .select-style select:focus {
+      outline: none;
+    }
+  </style>
+</head>
+
+<body>
+
+
+  <div class="table-responsive">
+    <table id="timetable" class="table">
+      <thead>
+        <tr>
+          <td scope="col">Subject Code</td>
+          <td scope="col">Subject Title</td>
+          <td scope="col">Component Code</td>
+          <td scope="col">Venue</td>
+          <td scope="col">Start Time</td>
+          <td scope="col">End Time</td>
+          <td scope="col">Day</td>
+          <td scope="col">Start Week</td>
+          <td scope="col">End Week</td>
+          <td scope="col">For Every (Week)</td>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+
+  <br>
+
+  <button type="button" class="btn btn-lg btn-block" onclick="addRow()">Add a new row</button>
+  <button type="button" class="btn btn-lg btn-block" onclick="removeLastRow()">Remove last row</button>
+  <button type="button" class="btn btn-lg btn-block" onclick="generate()">Generate calendar</button>
+
+  <script>
+
+    function addRow() {
+      var table = document.getElementById("timetable").getElementsByTagName('tbody')[0];
+      var row = table.insertRow(-1);
+      var cells = [];
+      row.setAttribute("class", "table-info")
+      for (i = 0; i < 10; i++) {
+        cells[i] = row.insertCell(i);
+      }
+      cells[0].innerHTML = "<input type=\"text\" name=\"subCode\" class=\"form-control\">";
+      cells[1].innerHTML = "<input type=\"text\" name=\"title\" class=\"form-control\">";
+      cells[2].innerHTML = "<input type=\"text\" name=\"compCode\" class=\"form-control\">";
+      cells[3].innerHTML = "<input type=\"text\" name=\"venue\" class=\"form-control\">";
+      cells[4].innerHTML = "<input type=\"time\" name=\"startT\" class=\"form-control\">";
+      cells[5].innerHTML = "<input type=\"time\" name=\"endT\" class=\"form-control\">";
+      cells[6].innerHTML = "<select class=\"select-style\" selected=\"MO\" name=\"day\"> <option value=\"1\">MO</option> <option value=\"2\">TUE</option> <option value=\"3\">WED</option> <option value=\"4\">THU</option> <option value=\"5\">FRI</option> <option value=\"6\">SAT</option> <option value=\"7\">SUN</option> </select>";
+      cells[7].innerHTML = "<input scope=\"row\" type=\"number\" name=\"startW\" class=\"form-control\">";
+      cells[8].innerHTML = "<input type=\"number\" name=\"endW\" class=\"form-control\">";
+      cells[9].innerHTML = "<input type=\"number\" name=\"freq\" class=\"form-control\">";
+
+    }
+
+    function removeLastRow() {
+      var table = document.getElementById("timetable");
+      if (table.rows.length - 1 != 1)
+        table.deleteRow(table.rows.length - 1)
+    }
+
+    var test;
+
+    function parse(r) {
+
+      try {
+
+        var entry = {
+
+          subCode: getValue(r.children[0]),
+          title: getValue(r.children[1]),
+          compCode: getValue(r.children[2]),
+          freq: parseInt(getValue(r.children[9])),
+          startW: parseInt(getValue(r.children[7])),
+          endW: parseInt(getValue(r.children[8])),
+          startT: getValue(r.children[4]),
+          endT: getValue(r.children[5]),
+          day: parseInt(getValue(r.children[6])),
+          venue: getValue(r.children[3])
+
+        }
+
+        return entry;
+
+      }
+      catch (err) {
+
+        return null;
+
+      }
+
+
+    }
+
+
+    function add_date_time(date, time) {
+      timeString = time + ':00';
+
+      var year = date.getFullYear();
+      var month = date.getMonth() + 1;
+      var day = date.getDate();
+      var dateString = '' + year + '-' + month + '-' + day;
+      var combined = new Date(dateString + ' ' + timeString);
+
+      return combined;
+    };
+
+    function generate() {
+
+      var table = document.getElementById("timetable");
+      var rows = table.rows;
+      console.log(rows);
+
+      var cal = ics(undefined, undefined, "Asia/Hong_Kong");
+
+      for (i = 1; i < rows.length; i++) {
+
+        var entry = parse(rows[i]);
+        var r = {
+
+          freq: "WEEKLY",
+          interval: entry.freq,
+          count: entry.endW - entry.startW + 1
+
+        }
+        if (entry != null) {
+
+
+          try {
+            startD = add_date_time(new Date(2019, 09 - 1, 1 + entry.day), entry.startT);
+            endD = add_date_time(new Date(2019, 09 - 1, 1 + entry.day), entry.endT);
+            startD.setDate(startD.getDate() + 7 * (entry.startW - 1));
+            startD.setDate(endD.getDate() + 7 * (entry.startW - 1));
+          }
+          catch (err) {
+
+            console.log(err);
+            break;
+
+          }
+
+          cal.addEvent(entry.compCode + " " + entry.title, entry.subCode, entry.venue, startD, endD, r);
+
+        }
+      }
+
+      cal.download();
+
+    }
+
+    function getValue(c) {
+
+      return c.firstChild.value;
+
+    }
+
+  </script>
+
+
+</body>
+
+</html>

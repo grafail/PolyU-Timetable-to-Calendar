@@ -1,0 +1,3 @@
+[submodule "ics"]
+	path = ics
+	url = https://github.com/demetrios-koziris/ics.js
