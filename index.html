@@ -53,16 +53,16 @@
     <table id="timetable" class="table">
       <thead>
         <tr>
-          <td scope="col">Subject Code</td>
-          <td scope="col">Subject Title</td>
-          <td scope="col">Component Code</td>
-          <td scope="col">Venue</td>
-          <td scope="col">Start Time</td>
-          <td scope="col">End Time</td>
-          <td scope="col">Day</td>
-          <td scope="col">Start Week</td>
-          <td scope="col">End Week</td>
-          <td scope="col">For Every (Week)</td>
+          <td>Subject Code</td>
+          <td>Subject Title</td>
+          <td>Component Code</td>
+          <td>Venue</td>
+          <td>Start Time</td>
+          <td>End Time</td>
+          <td>Day</td>
+          <td>Start Week</td>
+          <td>End Week</td>
+          <td>For Every (Week)</td>
         </tr>
       </thead>
       <tbody>
@@ -105,8 +105,6 @@
         table.deleteRow(table.rows.length - 1)
     }
 
-    var test;
-
     function parse(r) {
 
       try {
@@ -125,6 +123,14 @@
           venue: getValue(r.children[3])
 
         }
+
+        for(i=0;i<9;i++)
+          if(getValue(getValue(r.children[i])==null || r.children[i])==undefined || getValue(r.children[i])==''){
+            alert('All boxes must be filled');
+            return null;
+          }
+          
+          
 
         return entry;
 
@@ -155,13 +161,13 @@
 
       var table = document.getElementById("timetable");
       var rows = table.rows;
-      console.log(rows);
 
       var cal = ics(undefined, undefined, "Asia/Hong_Kong");
 
       for (i = 1; i < rows.length; i++) {
 
         var entry = parse(rows[i]);
+        if(entry==null) return;
         var r = {
 
           freq: "WEEKLY",
@@ -180,7 +186,6 @@
           }
           catch (err) {
 
-            console.log(err);
             break;
 
           }
@@ -202,6 +207,13 @@
 
   </script>
 
+
+  <footer>
+    <p>Please check your schedule after creating it. I am not responsible for any lost classes.</p>
+    <p> Created by: Rafail Giavrimis </br> Source code: <a
+        href="https://github.com/grafail/PolyU-Timetable-to-Calendar">
+        https://github.com/grafail/PolyU-Timetable-to-Calendar </a>
+  </footer>
 
 </body>
 
